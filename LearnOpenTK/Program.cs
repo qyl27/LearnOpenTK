@@ -1,12 +1,19 @@
-﻿using System;
+﻿using LearnOpenTK.Core;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Desktop;
 
-namespace LearnOpenTK
-{
-    class Program
+var game = new Game(
+    new GameWindowSettings
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
+        // RenderFrequency = 60, UpdateFrequency = 60
+    }, 
+    new NativeWindowSettings
+    {
+        Size = new Vector2i(1280, 720), 
+        Title = "Learn OpenTK!"
     }
-}
+);
+
+game.Run();
+
+game.Dispose();
