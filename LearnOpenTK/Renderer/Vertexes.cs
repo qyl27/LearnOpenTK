@@ -30,10 +30,10 @@ namespace LearnOpenTK.Renderer
             
             return this;
         }
-
-        public IntPtr ToUnmanagedArray()
+        
+        public float[] ToArray()
         {
-            return UnmanagedArray.ToUnmanagedFloatArray(Vertices.Count, Vertices.ToArray());
+            return Vertices.ToArray();
         }
 
         public int GetSize()

@@ -36,8 +36,9 @@ namespace LearnOpenTK.Core
 
             VBO = GL.GenBuffer();
             GL.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
-            GL.BufferData(BufferTargetARB.ArrayBuffer, Vertexes.GetSize(),
-                Vertexes.ToUnmanagedArray(), BufferUsageARB.StaticDraw);
+            var floats = Vertexes.ToArray();
+            
+            GL.BufferData(BufferTargetARB.ArrayBuffer, floats, BufferUsageARB.StaticDraw);
             
             VAO = GL.GenVertexArray();
             GL.BindVertexArray(VAO);
