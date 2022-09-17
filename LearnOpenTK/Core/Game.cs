@@ -15,6 +15,11 @@ namespace LearnOpenTK.Core
         private BufferHandle EBO;
         private Vertexes Vertexes;
         private Texture Texture;
+
+        private uint[] indices = {
+            0, 1, 3,
+            1, 2, 3
+        };
         
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
@@ -35,18 +40,13 @@ namespace LearnOpenTK.Core
                 .Vertex(-0.5f, -0.5f, 0.0f).TexCoord(0.0f, 0.0f)
                 .Vertex(-0.5f, 0.5f, 0.0f).TexCoord(0.0f, 1.0f);
             
-            uint[] indices = {  // note that we start from 0!
-                0, 1, 3,   // first triangle
-                1, 2, 3    // second triangle
-            };
-            
             VBO = GL.GenBuffer();
             GL.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
             GL.BufferData(BufferTargetARB.ArrayBuffer, Vertexes.ToArray(), BufferUsageARB.StaticDraw);
 
-            // EBO = GL.GenBuffer();
-            // GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, EBO);
-            // GL.BufferData(BufferTargetARB.ElementArrayBuffer, indices, BufferUsageARB.StaticDraw);
+            EBO = GL.GenBuffer();
+            GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, EBO);
+            GL.BufferData(BufferTargetARB.ElementArrayBuffer, indices, BufferUsageARB.StaticDraw);
             
             VAO = GL.GenVertexArray();
             GL.BindVertexArray(VAO);
@@ -72,8 +72,12 @@ namespace LearnOpenTK.Core
             
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2d, Texture.Handle);
+            GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, EBO);
+            GL.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
+            
+            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.DrawElements(PrimitiveType.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
             
             SwapBuffers();
             
@@ -99,8 +103,9 @@ namespace LearnOpenTK.Core
             GL.BindVertexArray(VertexArrayHandle.Zero);
             GL.UseProgram(ProgramHandle.Zero);
             
-            GL.DeleteBuffer(VBO);
             GL.DeleteVertexArray(VAO);
+            GL.DeleteBuffer(VBO);
+            GL.DeleteBuffer(EBO);
             
             Shader.Dispose();
             
