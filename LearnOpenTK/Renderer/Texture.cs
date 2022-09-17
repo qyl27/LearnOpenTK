@@ -14,7 +14,11 @@ public class Texture
         Handle = GL.GenTexture();
         
         StbImage.stbi_set_flip_vertically_on_load(1);
-        var image = ImageResult.FromStream(File.OpenRead(path), ColorComponents.RedGreenBlueAlpha);
+
+        using var stream = File.OpenRead(path);
+        var image = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+            
+        GL.BindTexture(TextureTarget.Texture2d, Handle);
 
         GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, (int) TextureWrapMode.Clamp);
         GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, (int) TextureWrapMode.Clamp);
@@ -22,7 +26,7 @@ public class Texture
         GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
         
         GL.TexImage2D(TextureTarget.Texture2d, 0, (int) InternalFormat.Rgba, image.Width, image.Height, 
-            0, PixelFormat.Rgba, PixelType.Byte, image.Data);
+            0, PixelFormat.Rgba, PixelType.UnsignedByte, image.Data);
         GL.GenerateTextureMipmap(Handle);
     }
 }

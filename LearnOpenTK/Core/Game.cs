@@ -12,6 +12,7 @@ namespace LearnOpenTK.Core
         private Shader Shader;
         private VertexArrayHandle VAO;
         private BufferHandle VBO;
+        private BufferHandle EBO;
         private Vertexes Vertexes;
         private Texture Texture;
         
@@ -33,10 +34,19 @@ namespace LearnOpenTK.Core
                 .Vertex(0.5f, -0.5f, 0.0f).TexCoord(1.0f, 0.0f)
                 .Vertex(-0.5f, -0.5f, 0.0f).TexCoord(0.0f, 0.0f)
                 .Vertex(-0.5f, 0.5f, 0.0f).TexCoord(0.0f, 1.0f);
-
+            
+            uint[] indices = {  // note that we start from 0!
+                0, 1, 3,   // first triangle
+                1, 2, 3    // second triangle
+            };
+            
             VBO = GL.GenBuffer();
             GL.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
             GL.BufferData(BufferTargetARB.ArrayBuffer, Vertexes.ToArray(), BufferUsageARB.StaticDraw);
+
+            // EBO = GL.GenBuffer();
+            // GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, EBO);
+            // GL.BufferData(BufferTargetARB.ElementArrayBuffer, indices, BufferUsageARB.StaticDraw);
             
             VAO = GL.GenVertexArray();
             GL.BindVertexArray(VAO);
