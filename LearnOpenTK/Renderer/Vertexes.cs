@@ -30,6 +30,14 @@ namespace LearnOpenTK.Renderer
             
             return this;
         }
+
+        public Vertexes TexCoord(float u, float v)
+        {
+            Vertices.Add(u);
+            Vertices.Add(v);
+            
+            return this;
+        }
         
         public float[] ToArray()
         {

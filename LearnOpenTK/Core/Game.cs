@@ -1,12 +1,9 @@
-﻿using System;
-using LearnOpenTK.Renderer;
-using LearnOpenTK.Utilities;
+﻿using LearnOpenTK.Renderer;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace LearnOpenTK.Core
 {
@@ -16,6 +13,7 @@ namespace LearnOpenTK.Core
         private VertexArrayHandle VAO;
         private BufferHandle VBO;
         private Vertexes Vertexes;
+        private Texture Texture;
         
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) 
             : base(gameWindowSettings, nativeWindowSettings)
@@ -29,26 +27,31 @@ namespace LearnOpenTK.Core
             GL.ClearColor(new Color4<Rgba>(0.2f, 0.3f, 0.3f, 1.0f));
 
             Vertexes = new Vertexes();
-            
-            Vertexes.Vertex(-0.5f, -0.5f, 0.0f)
-                .Vertex(0.5f, -0.5f, 0.0f)
-                .Vertex(0.0f, 0.5f, 0.0f);
+
+            Vertexes
+                .Vertex(0.5f, 0.5f, 0.0f).TexCoord(1.0f, 1.0f)
+                .Vertex(0.5f, -0.5f, 0.0f).TexCoord(1.0f, 0.0f)
+                .Vertex(-0.5f, -0.5f, 0.0f).TexCoord(0.0f, 0.0f)
+                .Vertex(-0.5f, 0.5f, 0.0f).TexCoord(0.0f, 1.0f);
 
             VBO = GL.GenBuffer();
             GL.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
-            var floats = Vertexes.ToArray();
-            
-            GL.BufferData(BufferTargetARB.ArrayBuffer, floats, BufferUsageARB.StaticDraw);
+            GL.BufferData(BufferTargetARB.ArrayBuffer, Vertexes.ToArray(), BufferUsageARB.StaticDraw);
             
             VAO = GL.GenVertexArray();
             GL.BindVertexArray(VAO);
             
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float,
-                false, 3 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
-            
             Shader = new Shader("shader.vert", "shader.frag");
-            Shader.Use();
+
+            Texture = new Texture(@"1.png");
+
+            var posIndex = (uint) GL.GetAttribLocation(Shader.Program, "pos");
+            GL.VertexAttribPointer(posIndex, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+            GL.EnableVertexAttribArray(posIndex);
+            
+            var texIndex = (uint) GL.GetAttribLocation(Shader.Program, "tex");
+            GL.VertexAttribPointer(texIndex, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+            GL.EnableVertexAttribArray(texIndex);
         }
 
         protected override void OnRenderFrame(FrameEventArgs args)
@@ -57,8 +60,10 @@ namespace LearnOpenTK.Core
             
             Shader.Use();
             
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2d, Texture.Handle);
             GL.BindVertexArray(VAO);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+            GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
             
             SwapBuffers();
             
@@ -69,10 +74,6 @@ namespace LearnOpenTK.Core
         {
             base.OnUpdateFrame(args);
 
-            // if (KeyboardState.IsKeyDown(Keys.Escape))
-            // {
-            //     Close();
-            // }
         }
 
         protected override void OnResize(ResizeEventArgs e)

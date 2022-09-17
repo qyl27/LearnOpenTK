@@ -7,44 +7,44 @@ namespace LearnOpenTK.Renderer;
 
 public class Shader : IDisposable
 {
-    private ProgramHandle Program;
+    public ProgramHandle Program { get; }
+
+    public ShaderHandle Vert { get; }
+    public ShaderHandle Frag { get; }
 
     public Shader(string vertexPath, string fragmentPath)
     {
         var vertexSource = File.ReadAllText(vertexPath);
         var fragmentSource = File.ReadAllText(fragmentPath);
 
-        var vertex = GL.CreateShader(ShaderType.VertexShader);
-        GL.ShaderSource(vertex, vertexSource);
+        Vert = GL.CreateShader(ShaderType.VertexShader);
+        GL.ShaderSource(Vert, vertexSource);
         
-        var fragment = GL.CreateShader(ShaderType.FragmentShader);
-        GL.ShaderSource(fragment, fragmentSource);
+        Frag = GL.CreateShader(ShaderType.FragmentShader);
+        GL.ShaderSource(Frag, fragmentSource);
         
-        GL.CompileShader(vertex);
-
         var success = 0;
-        GL.GetShaderi(vertex, ShaderParameterName.CompileStatus, ref success);
+        GL.CompileShader(Vert);
+        GL.GetShaderi(Vert, ShaderParameterName.CompileStatus, ref success);
         if (success != (int) All.True)
         {
-            GL.GetShaderInfoLog(vertex, out var log);
+            GL.GetShaderInfoLog(Vert, out var log);
             Console.WriteLine(log);
         }
-
-        GL.CompileShader(fragment);
-
-        GL.GetShaderi(fragment, ShaderParameterName.CompileStatus, ref success);
+        GL.CompileShader(Frag);
+        GL.GetShaderi(Frag, ShaderParameterName.CompileStatus, ref success);
         if (success != (int) All.True)
         {
-            GL.GetShaderInfoLog(fragment, out var log);
+            GL.GetShaderInfoLog(Frag, out var log);
             Console.WriteLine(log);
         }
 
         Program = GL.CreateProgram();
-        GL.AttachShader(Program, vertex);
-        GL.AttachShader(Program, fragment);
-        GL.LinkProgram(Program);
-
+        GL.AttachShader(Program, Vert);
+        GL.AttachShader(Program, Frag);
+        
         var linkResult = 0;
+        GL.LinkProgram(Program);
         GL.GetProgrami(Program, ProgramPropertyARB.LinkStatus, ref linkResult);
         if (linkResult != (int) All.True)
         {
@@ -52,17 +52,17 @@ public class Shader : IDisposable
             Console.WriteLine(log);
         }
 
-        GL.DetachShader(Program, vertex);
-        GL.DetachShader(Program, fragment);
-        GL.DeleteShader(fragment);
-        GL.DeleteShader(vertex);
+        GL.DetachShader(Program, Vert);
+        GL.DetachShader(Program, Frag);
+        GL.DeleteShader(Frag);
+        GL.DeleteShader(Vert);
     }
     
     public void Use()
     {
         GL.UseProgram(Program);
     }
-
+    
     private bool IsDisposed = false;
 
     protected virtual void Dispose(bool disposing)
